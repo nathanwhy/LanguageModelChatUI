@@ -34,6 +34,28 @@ public final class ConversationMessage: Identifiable, @unchecked Sendable {
 // MARK: - Convenience Accessors
 
 public extension ConversationMessage {
+    static let sessionSeparatorMetadataKey = "sessionSeparator"
+    static let sessionSeparatorTitleMetadataKey = "sessionSeparatorTitle"
+
+    var isSessionSeparator: Bool {
+        metadata[Self.sessionSeparatorMetadataKey] == "true"
+    }
+
+    var sessionSeparatorTitle: String {
+        let storedTitle = metadata[Self.sessionSeparatorTitleMetadataKey]?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if !storedTitle.isEmpty {
+            return storedTitle
+        }
+
+        let text = textContent.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !text.isEmpty {
+            return text
+        }
+
+        return "New Session"
+    }
+
     /// The primary text content of this message (first text part).
     var textContent: String {
         get {

@@ -14,7 +14,14 @@ private let requestBuildLogger = Logger(subsystem: "LanguageModelChatUI", catego
 extension ConversationSession {
     /// Build request messages from conversation history.
     func buildRequestMessages(capabilities: Set<ModelCapability>) -> [ChatRequestBody.Message] {
-        messages.flatMap { buildRequestMessages(from: $0, capabilities: capabilities) }
+        // If a session separator exists, only send messages after the last one.
+        let relevantMessages: [ConversationMessage]
+        if let lastSeparatorIndex = messages.lastIndex(where: { $0.isSessionSeparator }) {
+            relevantMessages = Array(messages[(lastSeparatorIndex + 1)...])
+        } else {
+            relevantMessages = messages
+        }
+        return relevantMessages.flatMap { buildRequestMessages(from: $0, capabilities: capabilities) }
     }
 
     func buildRequestMessages(
@@ -64,6 +71,9 @@ extension ConversationSession {
             return result
 
         default:
+            // Session separators are not sent to the model.
+            if message.isSessionSeparator { return [] }
+
             if message.role.rawValue == "tool",
                let toolResult = message.parts.compactMap({ part -> ToolResultContentPart? in
                    guard case let .toolResult(value) = part else { return nil }

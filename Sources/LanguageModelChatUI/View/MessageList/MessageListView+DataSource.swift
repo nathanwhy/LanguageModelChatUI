@@ -30,6 +30,7 @@ extension MessageListView {
         case userAttachment(String, Attachments)
         case reasoningContent(String, MessageRepresentation)
         case responseContent(String, MessageRepresentation)
+        case sessionSeparator(String, String)
         case hint(String, String)
         case toolCallHint(String, ToolCallContentPart)
         case activityReporting(String)
@@ -40,6 +41,7 @@ extension MessageListView {
             case let .userAttachment(id, _): "user-attachment-\(id)"
             case let .reasoningContent(id, _): "reasoning-\(id)"
             case let .responseContent(id, _): "response-\(id)"
+            case let .sessionSeparator(id, _): "separator-\(id)"
             case let .hint(id, _): "hint-\(id)"
             case let .toolCallHint(id, _): "tool-\(id)"
             case let .activityReporting(msg): "activity-\(msg)"
@@ -68,6 +70,11 @@ extension MessageListView {
 
         for message in messages {
             checkAddDateHint(message.createdAt)
+
+            if message.isSessionSeparator {
+                entries.append(.sessionSeparator(message.id, message.sessionSeparatorTitle))
+                continue
+            }
 
             let textContent = message.textContent
             let reasoningContent = message.reasoningContent ?? ""

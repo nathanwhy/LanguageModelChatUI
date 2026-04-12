@@ -141,6 +141,18 @@ public final class ConversationSession: Identifiable, Sendable {
     // MARK: - Message Management
 
     @discardableResult
+    public func appendLocalMessage(
+        role: MessageRole,
+        configure: ((ConversationMessage) -> Void)? = nil,
+        scrolling: Bool = true
+    ) -> ConversationMessage {
+        let message = appendNewMessage(role: role, configure: configure)
+        persistMessages()
+        notifyMessagesDidChange(scrolling: scrolling)
+        return message
+    }
+
+    @discardableResult
     func appendNewMessage(role: MessageRole, configure: ((ConversationMessage) -> Void)? = nil) -> ConversationMessage {
         let message = storageProvider.createMessage(in: id, role: role)
         configure?(message)
