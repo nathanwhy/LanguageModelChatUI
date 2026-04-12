@@ -16,18 +16,28 @@ private let submissionLogger = Logger(subsystem: "LanguageModelChatUI", category
     }
 }
 
-func makeUserInput(from object: ChatInputContent) -> ConversationSession.UserInput {
-    let attachmentSummary = object.attachments.map { attachment in
-        "\(attachment.type.rawValue)(fileBytes=\(attachment.fileData.count),previewBytes=\(attachment.previewImageData.count),textChars=\(attachment.textContent.count))"
-    }.joined(separator: ", ")
-    submissionLogger.info(
-        "makeUserInput textChars=\(object.text.count) attachments=\(object.attachments.count) [\(attachmentSummary)]"
-    )
+public extension ConversationSession.UserInput {
+    init(chatInputContent: ChatInputContent) {
+        self.init(text: chatInputContent.text, chatInputAttachments: chatInputContent.attachments)
+    }
 
-    return .init(
-        text: object.text,
-        attachments: object.attachments.map(makeContentPart)
-    )
+    init(text: String = "", chatInputAttachments: [ChatInputAttachment]) {
+        let attachmentSummary = chatInputAttachments.map { attachment in
+            "\(attachment.type.rawValue)(fileBytes=\(attachment.fileData.count),previewBytes=\(attachment.previewImageData.count),textChars=\(attachment.textContent.count))"
+        }.joined(separator: ", ")
+        submissionLogger.info(
+            "makeUserInput textChars=\(text.count) attachments=\(chatInputAttachments.count) [\(attachmentSummary)]"
+        )
+
+        self.init(
+            text: text,
+            attachments: chatInputAttachments.map(makeContentPart)
+        )
+    }
+}
+
+func makeUserInput(from object: ChatInputContent) -> ConversationSession.UserInput {
+    .init(chatInputContent: object)
 }
 
 private func makeContentPart(from attachment: ChatInputAttachment) -> ContentPart {

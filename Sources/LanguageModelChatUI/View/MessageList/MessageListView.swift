@@ -69,7 +69,7 @@ public final class MessageListView: UIView {
     private(set) lazy var markdownViewForSizeCalculation: MarkdownTextView = .init()
     private(set) lazy var markdownPackageCache: MarkdownPackageCache = .init()
 
-    init() {
+    public init() {
         super.init(frame: .zero)
 
         listView.delegate = self
@@ -93,6 +93,22 @@ public final class MessageListView: UIView {
     @available(*, unavailable)
     required init?(coder _: NSCoder) {
         fatalError()
+    }
+
+    @discardableResult
+    public func load(
+        conversationID: String,
+        models: ConversationSession.Models = .init(),
+        sessionConfiguration: ConversationSession.Configuration
+    ) -> ConversationSession {
+        let session = ConversationSessionManager.shared.session(for: conversationID, configuration: sessionConfiguration)
+        applyConversationModels(models, to: session)
+        bind(session: session)
+        return session
+    }
+
+    public func bind(session: ConversationSession) {
+        self.session = session
     }
 
     override public func layoutSubviews() {
