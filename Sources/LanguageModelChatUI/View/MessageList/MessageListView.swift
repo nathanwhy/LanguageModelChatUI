@@ -64,6 +64,11 @@ public final class MessageListView: UIView {
     var theme: MarkdownTheme = .default {
         didSet { listView.reloadData() }
     }
+    public var contentInsetAdjustmentBehavior: UIScrollView.ContentInsetAdjustmentBehavior = .never {
+        didSet {
+            listView.contentInsetAdjustmentBehavior = contentInsetAdjustmentBehavior
+        }
+    }
 
     private(set) lazy var labelForSizeCalculation: LTXLabel = .init()
     private(set) lazy var markdownViewForSizeCalculation: MarkdownTextView = .init()
@@ -76,7 +81,7 @@ public final class MessageListView: UIView {
         listView.adapter = self
         listView.alwaysBounceVertical = true
         listView.alwaysBounceHorizontal = false
-        listView.contentInsetAdjustmentBehavior = .never
+        listView.contentInsetAdjustmentBehavior = contentInsetAdjustmentBehavior
         listView.showsVerticalScrollIndicator = false
         listView.showsHorizontalScrollIndicator = false
         addSubview(listView)
