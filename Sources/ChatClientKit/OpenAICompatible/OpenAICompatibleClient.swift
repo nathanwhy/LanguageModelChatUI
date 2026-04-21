@@ -6,6 +6,7 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
     open var path: String?
     open var apiKey: String?
     open var defaultHeaders: [String: String]
+    open var defaultQueryItems: [URLQueryItem]
     open var requestCustomization: [String: Any]
 
     public enum Error: Swift.Error {
@@ -23,6 +24,7 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
         path: String? = nil,
         apiKey: String? = nil,
         defaultHeaders: [String: String] = [:],
+        defaultQueryItems: [URLQueryItem] = [],
         requestCustomization: [String: Any] = [:]
     ) {
         self.init(
@@ -30,6 +32,7 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
             path: path,
             apiKey: apiKey,
             defaultHeaders: defaultHeaders,
+            defaultQueryItems: defaultQueryItems,
             requestCustomization: requestCustomization,
             dependencies: .live
         )
@@ -40,6 +43,7 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
         path: String? = nil,
         apiKey: String? = nil,
         defaultHeaders: [String: String] = [:],
+        defaultQueryItems: [URLQueryItem] = [],
         requestCustomization: [String: Any] = [:],
         errorCollector: ErrorCollector = .new(),
         dependencies: RemoteClientDependencies
@@ -48,6 +52,7 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
         self.path = path
         self.apiKey = apiKey
         self.defaultHeaders = defaultHeaders
+        self.defaultQueryItems = defaultQueryItems
         self.requestCustomization = requestCustomization
         eventSourceFactory = dependencies.eventSourceFactory
         chunkDecoderFactory = dependencies.chunkDecoderFactory
@@ -78,7 +83,8 @@ open class OpenAICompatibleClient: BaseChatClient, @unchecked Sendable {
             baseURL: baseURL,
             path: path,
             apiKey: apiKey,
-            defaultHeaders: defaultHeaders
+            defaultHeaders: defaultHeaders,
+            additionalQueryItems: defaultQueryItems
         )
     }
 

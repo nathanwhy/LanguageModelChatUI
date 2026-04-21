@@ -12,6 +12,7 @@ struct OpenAICompatibleRequestBuilder {
     let path: String?
     let apiKey: String?
     var defaultHeaders: [String: String]
+    var additionalQueryItems: [URLQueryItem]
 
     let encoder: JSONEncoder
 
@@ -20,6 +21,7 @@ struct OpenAICompatibleRequestBuilder {
         path: String?,
         apiKey: String?,
         defaultHeaders: [String: String],
+        additionalQueryItems: [URLQueryItem] = [],
         encoder: JSONEncoder = {
             let encoder = JSONEncoder()
             encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
@@ -30,6 +32,7 @@ struct OpenAICompatibleRequestBuilder {
         self.path = path
         self.apiKey = apiKey
         self.defaultHeaders = defaultHeaders
+        self.additionalQueryItems = additionalQueryItems
         self.encoder = encoder
     }
 
@@ -66,7 +69,9 @@ struct OpenAICompatibleRequestBuilder {
                 baseComponents.path += separator + normalizedRequestPath
             }
         }
-        baseComponents.queryItems = pathComponents.queryItems
+        var queryItems = pathComponents.queryItems ?? []
+        queryItems.append(contentsOf: additionalQueryItems)
+        baseComponents.queryItems = queryItems.isEmpty ? nil : queryItems
 
         guard let url = baseComponents.url else {
             logger.error("failed to construct final URL from components")

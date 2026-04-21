@@ -27,6 +27,7 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
     open var apiKey: String?
     open var apiVersion: String
     open var defaultHeaders: [String: String]
+    open var defaultQueryItems: [URLQueryItem]
     open var thinkingBudgetTokens: Int
 
     public enum Error: Swift.Error {
@@ -43,6 +44,7 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
         apiKey: String? = nil,
         apiVersion: String = "2023-06-01",
         defaultHeaders: [String: String] = [:],
+        defaultQueryItems: [URLQueryItem] = [],
         thinkingBudgetTokens: Int = 0
     ) {
         self.init(
@@ -50,6 +52,7 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
             apiKey: apiKey,
             apiVersion: apiVersion,
             defaultHeaders: defaultHeaders,
+            defaultQueryItems: defaultQueryItems,
             thinkingBudgetTokens: thinkingBudgetTokens,
             dependencies: .live
         )
@@ -60,6 +63,7 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
         apiKey: String? = nil,
         apiVersion: String = "2023-06-01",
         defaultHeaders: [String: String] = [:],
+        defaultQueryItems: [URLQueryItem] = [],
         thinkingBudgetTokens: Int = 0,
         errorCollector: ErrorCollector = .new(),
         dependencies: RemoteClientDependencies
@@ -68,6 +72,7 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
         self.apiKey = apiKey
         self.apiVersion = apiVersion
         self.defaultHeaders = defaultHeaders
+        self.defaultQueryItems = defaultQueryItems
         self.thinkingBudgetTokens = thinkingBudgetTokens
         eventSourceFactory = dependencies.eventSourceFactory
         chunkDecoderFactory = dependencies.chunkDecoderFactory
@@ -109,6 +114,10 @@ open class AnthropicClient: BaseChatClient, @unchecked Sendable {
             components.path = "/\(messagesPath)"
         } else if !basePath.hasSuffix(messagesPath) {
             components.path = "/\(basePath)/\(messagesPath)"
+        }
+
+        if !defaultQueryItems.isEmpty {
+            components.queryItems = defaultQueryItems
         }
 
         guard let url = components.url else {
