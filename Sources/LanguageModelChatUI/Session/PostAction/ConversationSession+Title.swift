@@ -11,7 +11,10 @@ import Foundation
 extension ConversationSession {
     /// Auto-generate a title for the conversation using the title-generation model.
     func updateTitle() async {
-        guard let titleGenerationModel = models.titleGeneration else { return }
+        guard
+            let titleID = models.titleGeneration,
+            let titleGenerationModel = resolveModel(titleID)
+        else { return }
 
         let existingMetadata = ConversationTitleMetadata(storageValue: storageProvider.title(for: id))
         let existingTitle = existingMetadata?.title ?? ""
@@ -25,7 +28,10 @@ extension ConversationSession {
 
     /// Force-regenerate the title, ignoring any existing title.
     func regenerateTitle() async {
-        guard let titleGenerationModel = models.titleGeneration else { return }
+        guard
+            let titleID = models.titleGeneration,
+            let titleGenerationModel = resolveModel(titleID)
+        else { return }
         await generateTitle(using: titleGenerationModel)
     }
 

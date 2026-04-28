@@ -10,6 +10,8 @@ import ChatClientKit
 import Combine
 import Foundation
 
+public typealias ModelIdentifier = String
+
 /// Coordinates the message state and inference execution for a conversation.
 @MainActor
 public final class ConversationSession: Identifiable, Sendable {
@@ -33,14 +35,16 @@ public final class ConversationSession: Identifiable, Sendable {
     }
 
     public struct Models: Sendable {
-        public var chat: Model?
-        public var titleGeneration: Model?
+        public var chat: ModelIdentifier?
+        public var titleGeneration: ModelIdentifier?
 
-        public init(chat: Model? = nil, titleGeneration: Model? = nil) {
+        public init(chat: ModelIdentifier? = nil, titleGeneration: ModelIdentifier? = nil) {
             self.chat = chat
             self.titleGeneration = titleGeneration
         }
     }
+
+    public typealias ModelResolver = @MainActor (ModelIdentifier) -> Model?
 
     public struct Configuration: Sendable {
         public let storage: StorageProvider
@@ -48,19 +52,22 @@ public final class ConversationSession: Identifiable, Sendable {
         public let delegate: SessionDelegate?
         public let systemPrompt: String
         public let collapseReasoningWhenComplete: Bool
+        public let modelResolver: ModelResolver?
 
         public init(
             storage: StorageProvider,
             tools: ToolProvider? = nil,
             delegate: SessionDelegate? = nil,
             systemPrompt: String = "You are a helpful assistant.",
-            collapseReasoningWhenComplete: Bool = true
+            collapseReasoningWhenComplete: Bool = true,
+            modelResolver: ModelResolver? = nil
         ) {
             self.storage = storage
             self.tools = tools
             self.delegate = delegate
             self.systemPrompt = systemPrompt
             self.collapseReasoningWhenComplete = collapseReasoningWhenComplete
+            self.modelResolver = modelResolver
         }
     }
 
@@ -76,6 +83,7 @@ public final class ConversationSession: Identifiable, Sendable {
     let sessionDelegate: SessionDelegate?
     let systemPrompt: String
     let collapseReasoningWhenComplete: Bool
+    let modelResolver: ModelResolver?
 
     // MARK: - Reactive
 
@@ -134,8 +142,15 @@ public final class ConversationSession: Identifiable, Sendable {
         sessionDelegate = configuration.delegate
         systemPrompt = configuration.systemPrompt
         collapseReasoningWhenComplete = configuration.collapseReasoningWhenComplete
+        modelResolver = configuration.modelResolver
         models = .init()
         refreshContentsFromDatabase()
+    }
+
+    /// Map a `ModelIdentifier` to a freshly-built `Model` using the configured resolver.
+    /// Returns `nil` if no resolver is configured or the resolver cannot map the identifier.
+    public func resolveModel(_ identifier: ModelIdentifier) -> Model? {
+        modelResolver?(identifier)
     }
 
     // MARK: - Message Management

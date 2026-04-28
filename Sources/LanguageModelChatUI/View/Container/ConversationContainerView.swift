@@ -76,13 +76,16 @@ extension ConversationContainerView: ChatInputDelegate {
             completion(false)
             return
         }
-        guard let model = session.models.chat else {
+        guard
+            let chatID = session.models.chat,
+            session.resolveModel(chatID) != nil
+        else {
             completion(false)
             return
         }
         let userInput = makeUserInput(from: object)
         draftInputObject = nil
-        session.runInference(model: model, messageListView: messageListView, input: userInput) {
+        session.runInference(messageListView: messageListView, input: userInput) {
             completion(true)
         }
     }

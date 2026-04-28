@@ -113,14 +113,14 @@ class ViewController: ConfigurableViewController {
         toolProvider: DemoAlertTool.Provider,
         navigated: Bool
     ) -> ChatViewController {
-        let model = def.createModel()
         let chatVC = ChatViewController(
-            models: .init(chat: model, titleGeneration: model),
+            models: .init(chat: def.identifier, titleGeneration: def.identifier),
             sessionConfiguration: .init(
                 storage: DisposableStorageProvider.shared,
                 tools: toolProvider,
                 systemPrompt: def.systemPrompt,
-                collapseReasoningWhenComplete: def.collapseReasoning
+                collapseReasoningWhenComplete: def.collapseReasoning,
+                modelResolver: exampleModelResolver
             )
         )
         chatVC.prefersNavigationBarManaged = navigated

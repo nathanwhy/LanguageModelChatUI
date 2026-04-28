@@ -22,12 +22,22 @@ public extension ConversationSession {
     }
 
     /// Execute inference for the given user input.
+    ///
+    /// Resolves `models.chat` to a freshly-built `Model` via the configured `ModelResolver`
+    /// at the start of the call. If no chat identifier is set or the resolver returns nil,
+    /// the call is a no-op and `completion()` fires immediately.
     func runInference(
-        model: ConversationSession.Model,
         messageListView: MessageListView,
         input: UserInput,
         completion: @escaping @Sendable () -> Void
     ) {
+        guard
+            let chatID = models.chat,
+            let model = resolveModel(chatID)
+        else {
+            completion()
+            return
+        }
         cancelCurrentTask { [self] in
             let bgToken = sessionDelegate?.beginBackgroundTask { [weak self] in
                 Task { @MainActor in

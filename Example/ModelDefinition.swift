@@ -15,7 +15,8 @@ struct ModelDefinition {
     let systemPrompt: String
     let collapseReasoning: Bool
     let requiredAPIKey: APIKeyID
-    let createModel: () -> ConversationSession.Model
+    let identifier: ModelIdentifier
+    let makeModel: () -> ConversationSession.Model
 }
 
 let modelDefinitions: [ModelDefinition] = [
@@ -26,7 +27,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant powered by Kimi K2.5. Be concise, friendly, and helpful. You can use tools when explicitly asked.",
         collapseReasoning: true,
         requiredAPIKey: .moonshot,
-        createModel: {
+        identifier: "kimi-k2.5",
+        makeModel: {
             .init(
                 model: "kimi-k2.5",
                 client: MoonshotClient(apiKey: APIKeyID.moonshot.currentValue),
@@ -42,7 +44,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant powered by DeepSeek. Think carefully and be helpful.",
         collapseReasoning: true,
         requiredAPIKey: .deepseek,
-        createModel: {
+        identifier: "deepseek-reasoner",
+        makeModel: {
             .init(
                 model: "deepseek-reasoner",
                 client: DeepSeekClient(apiKey: APIKeyID.deepseek.currentValue),
@@ -58,7 +61,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant powered by Claude. Be concise and helpful. You can use tools when asked.",
         collapseReasoning: true,
         requiredAPIKey: .anthropic,
-        createModel: {
+        identifier: "claude-haiku-4-5-20251001",
+        makeModel: {
             .init(
                 model: "claude-haiku-4-5-20251001",
                 client: AnthropicClient(
@@ -77,7 +81,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant. Be concise and helpful.",
         collapseReasoning: false,
         requiredAPIKey: .openRouter,
-        createModel: {
+        identifier: "anthropic/claude-sonnet-4.6",
+        makeModel: {
             .init(
                 model: "anthropic/claude-sonnet-4.6",
                 client: OpenRouterClient(apiKey: APIKeyID.openRouter.currentValue),
@@ -93,7 +98,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant. Be concise and helpful.",
         collapseReasoning: true,
         requiredAPIKey: .openRouter,
-        createModel: {
+        identifier: "google/gemini-3-flash-preview",
+        makeModel: {
             .init(
                 model: "google/gemini-3-flash-preview",
                 client: OpenRouterClient(apiKey: APIKeyID.openRouter.currentValue),
@@ -109,7 +115,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant powered by Mistral. Be concise and helpful.",
         collapseReasoning: false,
         requiredAPIKey: .mistral,
-        createModel: {
+        identifier: "mistral-small-latest",
+        makeModel: {
             .init(
                 model: "mistral-small-latest",
                 client: OpenAICompatibleClient(
@@ -129,7 +136,8 @@ let modelDefinitions: [ModelDefinition] = [
         systemPrompt: "You are a helpful AI assistant. Be concise and helpful.",
         collapseReasoning: false,
         requiredAPIKey: .cerebras,
-        createModel: {
+        identifier: "llama3.1-8b",
+        makeModel: {
             .init(
                 model: "llama3.1-8b",
                 client: OpenAICompatibleClient(
@@ -143,3 +151,7 @@ let modelDefinitions: [ModelDefinition] = [
         }
     ),
 ]
+
+let exampleModelResolver: ConversationSession.ModelResolver = { id in
+    modelDefinitions.first { $0.identifier == id }?.makeModel()
+}
