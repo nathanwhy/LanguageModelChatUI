@@ -29,6 +29,7 @@ extension ConversationSession {
         let collapseAfterReasoningComplete = collapseReasoningWhenComplete
 
         let client = model.client
+        await client.setCollectedErrors(nil)
         let stream = try await client.streamingChat(
             body: .init(
                 model: model.model,
@@ -170,7 +171,15 @@ extension ConversationSession {
 
         if message.textContent.isEmpty, (message.reasoningContent ?? "").isEmpty, pendingToolCalls.isEmpty {
             message.finishReason = .error
-            throw InferenceError.noResponseFromModel
+            let displayMessage = CollectedErrorDisplayMessage.resolve(
+                collectedError: client.collectedErrors,
+                fallback: InferenceError.noResponseFromModel.localizedDescription
+            )
+            throw NSError(
+                domain: String(localized: "Inference Error"),
+                code: 0,
+                userInfo: [NSLocalizedDescriptionKey: displayMessage]
+            )
         } else if !pendingToolCalls.isEmpty {
             message.finishReason = .toolCalls
         } else {
