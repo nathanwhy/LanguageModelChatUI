@@ -227,7 +227,6 @@ public final class ConversationSession: Identifiable, Sendable {
             if !messageIDs.isEmpty {
                 storageProvider.delete(messageIDs)
             }
-            storageProvider.setTitle("", for: id)
             lastUsage = nil
             refreshContentsFromDatabase(scrolling: false)
             completion()
