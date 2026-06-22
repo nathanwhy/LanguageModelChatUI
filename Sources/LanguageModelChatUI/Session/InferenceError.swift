@@ -9,6 +9,9 @@ import Foundation
 
 /// Errors that can occur during inference execution.
 public enum InferenceError: LocalizedError, Sendable {
+    /// No chat model has been configured on the session.
+    case noModelConfigured
+
     /// The model returned no content (no text, reasoning, or tool calls).
     case noResponseFromModel
 
@@ -23,6 +26,8 @@ public enum InferenceError: LocalizedError, Sendable {
 
     public var errorDescription: String? {
         switch self {
+        case .noModelConfigured:
+            String.localized("No chat model configured for this session.")
         case .noResponseFromModel:
             String.localized("No response from model.")
         case let .toolNotFound(name):
